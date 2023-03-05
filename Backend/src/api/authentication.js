@@ -1,7 +1,7 @@
-const { NText } = require("mssql");
+const AuthenticationService = require("../services/authentication.service");
 
 module.exports = (app) => {
-  //   const service = new AuthenticationService();
+  const service = new AuthenticationService();
 
   app.post("/auth/signup", async (req, res, next) => {
     try {
