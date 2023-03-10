@@ -1,4 +1,4 @@
-create procedure sp_crudSetupMasterDetail
+alter procedure sp_crudSetupMasterDetail
 
 @operationId int = 1,
 @setupMasterId int = null,
@@ -14,7 +14,7 @@ as
 
 begin 
 
-	if(@operationId = 1)
+	if(@operationId in (1,0))
 	begin
 		select 
 			sd.setupDetailId, 
@@ -34,7 +34,13 @@ begin
 			(sm.flexInt1 = @flexInt1 or @flexInt1 is null) and
 			(sm.flexInt2 = @flexInt2 or @flexInt2 is null) and
 			(sm.flexString1 = @flexString1 or @flexString1 is null) and
-			(sm.flexString2 = @flexString2 or @flexString2 is null) 
+			(sm.flexString2 = @flexString2 or @flexString2 is null) and 
+			sd.isDeleted = 0
+
+		if(@operationId = 1)
+		begin
+			select setupMasterId, setupMasterName, flexInt1, flexString1 from setupMaster where isDeleted = 0
+		end
 	end
 
 	begin try
@@ -48,14 +54,20 @@ begin
 			flexString1,
 			flexString2,
 			flexInt1,
-			flexInt2 )
+			flexInt2,
+			createdBy,
+			createdOn,
+			isDeleted)
 		values (
 			@setupDetailName,
 			@setupMasterId,
 			@flexString1,
 			@flexString2,
 			@flexInt1,
-			@flexInt2)
+			@flexInt2,
+			@userId,
+			GETDATE(),
+			0)
 	end
 	
 	if(@operationId = 3)
@@ -65,9 +77,20 @@ begin
 			flexString1 = @flexString1,
 			flexString2 = @flexString2,
 			flexInt1 = @flexInt1,
-			flexInt2 = @flexInt2
+			flexInt2 = @flexInt2,
+			updatedBy = @userId,
+			updatedOn = GETDATE()
 		where
 			setupDetailId = @setupDetailId
+	end
+
+	if(@operationId = 4)
+	begin
+		update setupDetail set
+			isDeleted = 1,
+			updatedBy = @userId,
+			updatedOn = GETDATE()
+		where setupDetailId = @setupDetailId
 	end
 
 	commit transaction

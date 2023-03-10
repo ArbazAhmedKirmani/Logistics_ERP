@@ -142,6 +142,7 @@ go
 
 create table vehicleAttachment (
 	vattId int primary key identity(1,1) not null,
+	vehicleId int foreign key references setupVehicles(vehicleId) not null,
 	attachementPath varchar(max) not null,
 	mimeType varchar(50) not null,
 	originalName varchar(max) null
@@ -162,9 +163,35 @@ create table routeInfo (
 )
 go
 
+create table customers (
+	customerId int primary key identity(1,1) not null,
+	customerName varchar(100) not null,
+	ntn varchar(20) null,
+	pocName varchar(100) null,
+	pocContact varchar(50) null,
+	pocEmail varchar(100) null,
+	address varchar(max),
+	city bigint foreign key references setupDetail(setupDetailId) null,
+	createdBy int foreign key references users(userId) not null,
+	createdOn datetime not null,
+	updatedBy int foreign key references users(userId) null,
+	updatedOn datetime null,
+	isDeleted bit not null
+)
+go
+
+create table customerRoleMapping (
+	crmId bigint primary key identity(1,1) not null,
+	customerId int foreign key references customers(customerId) not null,
+	roleId int foreign key references roles(roleId) not null,
+	isDeleted bit not null
+)
+go
+
 create table tripMaster (
 	tripMasterId bigint primary key identity(1,1) not null,
 	vehicleId int foreign key references setupVehicles(vehicleId) not null,
+	customerId int foreign key references customers(customerId) not null,
 	startDate date not null,
 	endDate date not null,
 	routeId int foreign key references routeInfo(routeId) not null,
